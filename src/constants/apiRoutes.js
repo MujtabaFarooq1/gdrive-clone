@@ -4,6 +4,15 @@ const API_ROUTES = {
     login: "/api/auth/login",
     logout: "/api/auth/logout",
   },
+  drive: {
+    getDriveData: "/api/drive",
+    folder: {
+      create: "/api/drive/folder",
+    },
+    file: {
+      upload: "/api/drive/file",
+    },
+  },
 };
 
 export default API_ROUTES;

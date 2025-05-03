@@ -31,10 +31,6 @@ export const loginUser = async (email, password) => {
 export const logutUser = async () => {
   const res = await fetch(API_ROUTES.auth.logout, {
     method: "POST",
-    // body: {},
-    // headers: {
-    //   "Content-Type": "application/json",
-    // },
   });
   if (!res.ok) {
     throw new Error("Logout failed");

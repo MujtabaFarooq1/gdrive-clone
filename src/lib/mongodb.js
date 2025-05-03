@@ -18,6 +18,7 @@ async function connectToDatabase() {
     cached.promise = mongoose
       .connect(MONGODB_URI, {
         dbName: "gdrive-clone",
+        autoIndex: true,
       })
       .then((mongooseInstance) => mongooseInstance);
   }

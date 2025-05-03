@@ -1,10 +1,15 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
+import { withAuth } from "@/lib/withAuth";
 
-export async function GET() {
+async function getServerHealthInfo(req) {
   try {
     await connectToDatabase();
-    return NextResponse.json({ success: true, message: "API working fine!" });
+
+    return NextResponse.json({
+      success: true,
+      message: "API working fine!--",
+    });
   } catch (error) {
     return NextResponse.json(
       {
@@ -15,3 +20,5 @@ export async function GET() {
     );
   }
 }
+
+export const GET = getServerHealthInfo;
