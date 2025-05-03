@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import DriveView from "@/components/DriveView";
+import DriveView from "@/components/driveView";
 import { Loader2 } from "lucide-react";
 
 export default function DashboardPage() {
