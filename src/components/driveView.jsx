@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Folder, Loader2, ArrowLeft } from "lucide-react";
 
@@ -9,8 +9,24 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import LogoutButton from "@/components/logoutButton";
-import { createFolder, getDriveData, uploadFile } from "@/lib/drive";
+import {
+  createFolder,
+  deleteDriveItemAndItsChildren,
+  getDriveData,
+  renameDriveItem,
+  uploadFile,
+} from "@/lib/drive";
 import FileThumbnail from "@/components/fileThumbnail";
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+import { MoreVertical } from "lucide-react";
+import DriveItemDialog from "./drive-dialogItem";
 
 export default function DriveView() {
   const searchParams = useSearchParams();
@@ -23,12 +39,21 @@ export default function DriveView() {
   const [currentFolder, setCurrentFolder] = useState([]);
   const [folderName, setFolderName] = useState("");
 
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [dialogAction, setDialogAction] = useState("");
+
+  const handleDialogOpen = (item, action) => {
+    setSelectedItem(item);
+    setDialogAction(action);
+    setDialogOpen(true);
+  };
+
   const handleCreateFolder = async () => {
     setIsLoading(true);
     try {
       await createFolder(folderName, currentFolderId);
       setFolderName("");
-      handleGetDriveData();
       toast.success("Folder created!");
     } catch (err) {
       toast.error(err?.message || "Error creating folder");
@@ -80,6 +105,32 @@ export default function DriveView() {
     }
 
     router.push(url.pathname + url.search);
+  };
+
+  const handleRenameDriveItem = async (id, name) => {
+    try {
+      setIsLoading(true);
+      await renameDriveItem(id, name);
+      await handleGetDriveData();
+      toast.success(`${selectedItem?.name} Renamed to ${name}`);
+    } catch (error) {
+      toast.error(error?.message || "Error renaming");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDeleteItemAndChildren = async (id) => {
+    try {
+      setIsLoading(true);
+      await deleteDriveItemAndItsChildren(id);
+      await handleGetDriveData();
+      toast.success(`${selectedItem?.name} Deleted`);
+    } catch (error) {
+      toast.error(error?.message || "Error deleting");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -136,6 +187,37 @@ export default function DriveView() {
           </div>
         </div>
 
+        <DriveItemDialog
+          open={dialogOpen}
+          setOpen={setDialogOpen}
+          title={
+            dialogAction === "delete"
+              ? "Delete this item?"
+              : "Rename this item?"
+          }
+          description={
+            dialogAction === "delete"
+              ? `Are you sure you want to delete "${selectedItem?.name}" ${
+                  selectedItem?.type === "folder" ? "and its children" : ""
+                }? This cannot be undone.`
+              : `Enter a new name for "${selectedItem?.name}".`
+          }
+          confirmText={dialogAction === "delete" ? "Delete" : "Rename"}
+          action={dialogAction}
+          item={selectedItem}
+          onConfirm={async (newName) => {
+            if (!selectedItem) return;
+
+            if (dialogAction === "delete") {
+              await handleDeleteItemAndChildren(selectedItem._id);
+            } else {
+              await handleRenameDriveItem(selectedItem._id, newName);
+            }
+            handleGetDriveData();
+          }}
+          onCancel={() => setSelectedItem(null)}
+        />
+
         {isLoading ? (
           <div className="flex justify-center items-center h-40">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
@@ -147,15 +229,37 @@ export default function DriveView() {
             {driveItems.map((item) => (
               <div
                 key={item._id}
-                className="border p-4 rounded-lg bg-muted hover:bg-background transition text-center cursor-pointer"
+                className="relative border p-4 rounded-lg bg-muted hover:bg-background transition text-center cursor-pointer flex flex-col items-center justify-center"
                 onDoubleClick={() => {
                   if (item.type === "folder") {
                     router.push(`/dashboard?folderId=${item._id}`);
                   }
                 }}
               >
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="absolute top-2 right-2 p-1 rounded hover:bg-accent">
+                      <MoreVertical className="h-4 w-4" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem
+                      onClick={() => handleDialogOpen(item, "rename")}
+                    >
+                      Rename
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem
+                      className="text-red-500"
+                      onClick={() => handleDialogOpen(item, "delete")}
+                    >
+                      Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
                 {item.type === "folder" ? (
-                  <div className="flex flex-col items-center justify-center gap-2">
+                  <div className="flex flex-col items-center justify-center gap-2 mt-2">
                     <Folder className="w-12 h-12 text-yellow-500" />
                     <span className="font-medium break-words">{item.name}</span>
                   </div>

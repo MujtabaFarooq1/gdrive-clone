@@ -6,6 +6,8 @@ const API_ROUTES = {
   },
   drive: {
     getDriveData: "/api/drive",
+    renameDriveItem: "/api/drive/:id",
+    deleteDriveItemWithChildren: "/api/drive/:id",
     folder: {
       create: "/api/drive/folder",
     },

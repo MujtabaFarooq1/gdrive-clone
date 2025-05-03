@@ -3,7 +3,7 @@ import { getUserFromToken } from "./jwtControl";
 import { NextResponse } from "next/server";
 
 export function withAuth(handler) {
-  return async (req) => {
+  return async (req, ctx) => {
     const cookieStore = await cookies();
     const token = cookieStore.get("token")?.value;
 
@@ -26,7 +26,7 @@ export function withAuth(handler) {
 
       req.user = { userId: user.userId, email: user.email };
 
-      return handler(req);
+      return handler(req, ctx);
     } catch (error) {
       return NextResponse.json(
         { success: false, message: error?.message || "Unauthorized" },

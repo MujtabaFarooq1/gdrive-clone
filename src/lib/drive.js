@@ -59,3 +59,40 @@ export const uploadFile = async (formData) => {
 
   return data;
 };
+
+export const renameDriveItem = async (id, name) => {
+  const res = await fetch(
+    API_ROUTES.drive.renameDriveItem.replaceAll(":id", id),
+    {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name }),
+    }
+  );
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error("Failed to upload file");
+  }
+
+  return data;
+};
+
+export const deleteDriveItemAndItsChildren = async (id) => {
+  const res = await fetch(
+    API_ROUTES.drive.deleteDriveItemWithChildren.replaceAll(":id", id),
+    {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+    }
+  );
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error("Failed to upload file");
+  }
+
+  return data;
+};

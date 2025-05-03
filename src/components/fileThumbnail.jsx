@@ -33,7 +33,7 @@ const FileThumbnail = ({ file }) => {
     <Link
       href={url}
       target="_blank"
-      className="flex flex-col items-center p-4 bg-white shadow-md rounded-md w-40"
+      className="flex flex-col text-center justify-center items-center w-full"
     >
       {isImage ? (
         <img
