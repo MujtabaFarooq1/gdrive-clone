@@ -12,4 +12,6 @@ export const serverEnv = {
   CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET,
   CLOUDINARY_STORAGE_FOLDER:
     process.env.CLOUDINARY_STORAGE_FOLDER || "gdrive-clone",
+
+  MAX_FILE_SIZE: (process.env.MAX_FILE_SIZE_MB || 5) * 1024 * 1024,
 };

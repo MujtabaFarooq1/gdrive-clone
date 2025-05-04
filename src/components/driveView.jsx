@@ -35,6 +35,7 @@ export default function DriveView() {
   const currentFolderId = searchParams.get("folderId") || null;
 
   const [isLoading, setIsLoading] = useState(true);
+  const [isCreatingFolder, setIsCreatingFolder] = useState(false);
   const [driveItems, setDriveItems] = useState([]);
   const [currentFolder, setCurrentFolder] = useState([]);
   const [folderName, setFolderName] = useState("");
@@ -43,6 +44,8 @@ export default function DriveView() {
   const [selectedItem, setSelectedItem] = useState(null);
   const [dialogAction, setDialogAction] = useState("");
 
+  const MAX_FILE_SIZE = process.env.NEXT_PUBLIC_MAX_FILE_SIZE_MB * 1024 * 1024;
+
   const handleDialogOpen = (item, action) => {
     setSelectedItem(item);
     setDialogAction(action);
@@ -50,21 +53,26 @@ export default function DriveView() {
   };
 
   const handleCreateFolder = async () => {
-    setIsLoading(true);
+    setIsCreatingFolder(true);
     try {
       await createFolder(folderName, currentFolderId);
       setFolderName("");
-      toast.success("Folder created!");
+      await handleGetDriveData();
     } catch (err) {
-      toast.error(err?.message || "Error creating folder");
+      console.log(err);
     } finally {
-      setIsLoading(false);
+      setIsCreatingFolder(false);
     }
   };
 
   const handleUploadFile = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    if (file.size > MAX_FILE_SIZE) {
+      toast.error("File is too large. Max size is 5MB.");
+      return (e.target.value = "");
+    }
 
     const formData = new FormData();
     formData.append("file", file, file.name);
@@ -75,10 +83,10 @@ export default function DriveView() {
       await uploadFile(formData);
       handleGetDriveData();
     } catch (err) {
-      toast.error(err?.message || "Upload failed");
+      console.log(err);
     } finally {
       setIsLoading(false);
-      e.target.value = ""; // reset input
+      e.target.value = "";
     }
   };
 
@@ -87,8 +95,8 @@ export default function DriveView() {
       const driveResponse = await getDriveData(currentFolderId);
       setDriveItems(driveResponse?.data?.items || []);
       setCurrentFolder(driveResponse?.data?.currentFolder);
-    } catch (error) {
-      toast.error(error?.message || "Failed to load drive data");
+    } catch (err) {
+      console.log(err);
     } finally {
       setIsLoading(false);
     }
@@ -104,7 +112,8 @@ export default function DriveView() {
       url.searchParams.set("folderId", parentId);
     }
 
-    router.push(url.pathname + url.search);
+    setIsLoading(true);
+    router.push(url.pathname + url.search, { scroll: false });
   };
 
   const handleRenameDriveItem = async (id, name) => {
@@ -112,9 +121,8 @@ export default function DriveView() {
       setIsLoading(true);
       await renameDriveItem(id, name);
       await handleGetDriveData();
-      toast.success(`${selectedItem?.name} Renamed to ${name}`);
-    } catch (error) {
-      toast.error(error?.message || "Error renaming");
+    } catch (err) {
+      console.log(err);
     } finally {
       setIsLoading(false);
     }
@@ -125,9 +133,8 @@ export default function DriveView() {
       setIsLoading(true);
       await deleteDriveItemAndItsChildren(id);
       await handleGetDriveData();
-      toast.success(`${selectedItem?.name} Deleted`);
-    } catch (error) {
-      toast.error(error?.message || "Error deleting");
+    } catch (err) {
+      console.log(err);
     } finally {
       setIsLoading(false);
     }
@@ -168,9 +175,9 @@ export default function DriveView() {
               />
               <Button
                 onClick={handleCreateFolder}
-                disabled={isLoading || !folderName.trim()}
+                disabled={isCreatingFolder || !folderName.trim()}
               >
-                {isLoading ? (
+                {isCreatingFolder ? (
                   <span className="flex items-center gap-2">
                     <Loader2 className="h-4 w-4 animate-spin" /> Creating...
                   </span>
@@ -232,7 +239,10 @@ export default function DriveView() {
                 className="relative border p-4 rounded-lg bg-muted hover:bg-background transition text-center cursor-pointer flex flex-col items-center justify-center"
                 onDoubleClick={() => {
                   if (item.type === "folder") {
-                    router.push(`/dashboard?folderId=${item._id}`);
+                    setIsLoading(true);
+                    router.push(`/dashboard?folderId=${item._id}`, {
+                      scroll: false,
+                    });
                   }
                 }}
               >

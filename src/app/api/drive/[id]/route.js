@@ -7,6 +7,8 @@ import { extractPublicIdFromCloudinaryUrl } from "@/lib/helpers";
 
 async function renameDriveItem(req, { params }) {
   try {
+    const userId = req.user.userId;
+
     await connectToDatabase();
 
     const { name } = await req.json();
@@ -14,16 +16,35 @@ async function renameDriveItem(req, { params }) {
 
     if (!id || !name?.trim()) {
       return NextResponse.json(
-        { success: false, message: "Invalid request" },
+        {
+          success: false,
+          message: "Invalid request",
+          data: null,
+        },
         { status: 400 }
       );
     }
 
     const foundItem = await DriveItem.findById(id);
 
+    if (foundItem.userId.toString() !== userId) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Unauthorized request",
+          data: null,
+        },
+        { status: 401 }
+      );
+    }
+
     if (!foundItem) {
       return NextResponse.json(
-        { success: false, message: "Item not found" },
+        {
+          success: false,
+          message: "Item not found",
+          data: null,
+        },
         { status: 404 }
       );
     }
@@ -33,11 +54,16 @@ async function renameDriveItem(req, { params }) {
 
     return NextResponse.json({
       success: true,
+      message: `${foundItem.type.toUpperCase()} renamed to "${name}" successfully`,
       data: foundItem,
     });
   } catch (err) {
     return NextResponse.json(
-      { success: false, message: err.message },
+      {
+        success: false,
+        message: err.message || "Server error",
+        data: null,
+      },
       { status: 500 }
     );
   }
@@ -58,15 +84,9 @@ async function deleteItemAndChildren(itemId, visited) {
   if (item?.type === "file" && item.url) {
     try {
       const publicId = extractPublicIdFromCloudinaryUrl(item.url);
-
-      console.log(`Cloudinary public id is`, publicId);
-
       await cloudinary.uploader.destroy(publicId);
     } catch (err) {
-      console.warn(
-        `Cloudinary delete failed for ${item.cloudinaryUrl}`,
-        err.message
-      );
+      console.warn(`Cloudinary delete failed for ${item.url}`, err.message);
     }
   }
 
@@ -75,21 +95,43 @@ async function deleteItemAndChildren(itemId, visited) {
 
 async function deleteDriveItemAndItsChildren(req, { params }) {
   try {
+    const userId = req.user.userId;
+
     await connectToDatabase();
 
     const { id } = await params;
 
     if (!id) {
       return NextResponse.json(
-        { success: false, message: "Invalid request. No item ID provided." },
+        {
+          success: false,
+          message: "Invalid request. No item ID provided.",
+          data: null,
+        },
         { status: 400 }
       );
     }
 
     const foundItem = await DriveItem.findById(id);
+
+    if (foundItem.userId.toString() !== userId) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Unauthorized request",
+          data: null,
+        },
+        { status: 401 }
+      );
+    }
+
     if (!foundItem) {
       return NextResponse.json(
-        { success: false, message: "Item not found." },
+        {
+          success: false,
+          message: "Item not found",
+          data: null,
+        },
         { status: 404 }
       );
     }
@@ -100,17 +142,21 @@ async function deleteDriveItemAndItsChildren(req, { params }) {
 
     return NextResponse.json({
       success: true,
-      message: "Item and its children deleted successfully.",
+      message: "Item and its children deleted successfully",
+      data: null,
     });
   } catch (err) {
     console.error("Delete error:", err);
     return NextResponse.json(
-      { success: false, message: err.message || "Server error." },
+      {
+        success: false,
+        message: err.message || "Server error",
+        data: null,
+      },
       { status: 500 }
     );
   }
 }
 
 export const PATCH = withAuth(renameDriveItem);
-
 export const DELETE = withAuth(deleteDriveItemAndItsChildren);

@@ -32,10 +32,7 @@ export default function LoginPage() {
       await loginUser(data?.email, data?.password);
       return router.push(APP_ROUTES.dashboardPage);
     } catch (error) {
-      toast.error(error?.message || "API failed for signup", {
-        position: "top-right",
-        duration: 1000,
-      });
+      console.log(error);
     } finally {
       setLoading(false);
     }

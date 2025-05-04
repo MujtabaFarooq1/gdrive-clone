@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { Button } from "./ui/button";
 import { useRouter } from "next/navigation";
-import { logutUser } from "@/lib/auth";
+
 import APP_ROUTES from "@/constants/appRoutes";
+import { logoutUser } from "@/lib/auth";
 
 const LogoutButton = () => {
   const router = useRouter();
@@ -11,13 +12,10 @@ const LogoutButton = () => {
   const handleLogutUser = async () => {
     setIsLoggingOut(true);
     try {
-      await logutUser();
+      await logoutUser();
       router.push(APP_ROUTES.loginPage);
     } catch (error) {
-      toast.error(error?.message || "API failed for logout", {
-        position: "top-right",
-        duration: 1000,
-      });
+      console.log(error);
     } finally {
       setIsLoggingOut(false);
     }

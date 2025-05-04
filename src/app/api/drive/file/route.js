@@ -4,6 +4,7 @@ import { withAuth } from "@/lib/withAuth";
 import DriveItem from "@/models/driveItemModel";
 import cloudinary from "@/lib/cloudinary";
 import { appConfig } from "@/config/app";
+import { serverEnv } from "@/config/env";
 
 async function uploadFile(req) {
   try {
@@ -14,8 +15,23 @@ async function uploadFile(req) {
 
     if (!file || typeof file === "string") {
       return NextResponse.json(
-        { success: false, message: "No file uploaded" },
+        {
+          success: false,
+          message: "No file uploaded",
+          data: null,
+        },
         { status: 400 }
+      );
+    }
+
+    if (file.size > serverEnv.MAX_FILE_SIZE) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: `File exceeds ${serverEnv.MAX_FILE_SIZE} B limit`,
+          data: null,
+        },
+        { status: 413 }
       );
     }
 
@@ -50,10 +66,18 @@ async function uploadFile(req) {
       url: uploaded?.secure_url,
     });
 
-    return NextResponse.json({ success: true, data: newItem });
+    return NextResponse.json({
+      success: true,
+      message: "File uploaded successfully",
+      data: newItem,
+    });
   } catch (error) {
     return NextResponse.json(
-      { success: false, message: error.message },
+      {
+        success: false,
+        message: error.message || "Server error",
+        data: null,
+      },
       { status: 500 }
     );
   }
