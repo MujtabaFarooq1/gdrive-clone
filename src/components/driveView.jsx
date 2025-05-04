@@ -27,10 +27,12 @@ import {
 
 import { MoreVertical } from "lucide-react";
 import DriveItemDialog from "./drive-dialogItem";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function DriveView() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const isMobile = useIsMobile();
 
   const currentFolderId = searchParams.get("folderId") || null;
 
@@ -145,15 +147,19 @@ export default function DriveView() {
   }, [currentFolderId]);
 
   return (
-    <div className="p-8 max-w-6xl mx-auto">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-semibold">Google Drive Clone</h1>
+    <div className="px-4 sm:px-8 py-4 sm:py-8 max-w-6xl mx-auto">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8">
+        <h1 className="text-xl sm:text-3xl font-semibold">
+          Google Drive Clone
+        </h1>
         <LogoutButton />
       </div>
 
-      <div className="p-6 border rounded-lg shadow-sm bg-white">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-semibold">My Drive</h2>
+      <div className="p-4 sm:p-6 border rounded-lg shadow-sm bg-white">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <h2 className="text-lg sm:text-2xl font-semibold">
+            Welcome to Drive
+          </h2>
           {currentFolderId && (
             <Button variant="outline" onClick={handleBack}>
               <ArrowLeft className="w-4 h-4 mr-2" />
@@ -165,7 +171,7 @@ export default function DriveView() {
         <div className="flex flex-col gap-6 sm:flex-row mb-10">
           <div className="flex flex-1 flex-col gap-2">
             <Label htmlFor="folderName">Folder Name</Label>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <Input
                 id="folderName"
                 placeholder="Enter folder name"
@@ -232,13 +238,21 @@ export default function DriveView() {
         ) : driveItems.length === 0 ? (
           <p className="text-gray-500 text-center">This folder is empty</p>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 select-none">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 select-none">
             {driveItems.map((item) => (
               <div
                 key={item._id}
-                className="relative border p-4 rounded-lg bg-muted hover:bg-background transition text-center cursor-pointer flex flex-col items-center justify-center"
+                className="relative border p-3 sm:p-4 rounded-lg bg-muted hover:bg-background transition text-center cursor-pointer flex flex-col items-center justify-center"
+                onClick={() => {
+                  if (isMobile && item.type === "folder") {
+                    setIsLoading(true);
+                    router.push(`/dashboard?folderId=${item._id}`, {
+                      scroll: false,
+                    });
+                  }
+                }}
                 onDoubleClick={() => {
-                  if (item.type === "folder") {
+                  if (!isMobile && item.type === "folder") {
                     setIsLoading(true);
                     router.push(`/dashboard?folderId=${item._id}`, {
                       scroll: false,
@@ -248,7 +262,7 @@ export default function DriveView() {
               >
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="absolute top-2 right-2 p-1 rounded hover:bg-accent">
+                    <button className="absolute top-[1px] sm:top-2 right-[-4px] sm:right-2 p-1 sm:p-2 rounded hover:bg-accent">
                       <MoreVertical className="h-4 w-4" />
                     </button>
                   </DropdownMenuTrigger>
@@ -270,8 +284,10 @@ export default function DriveView() {
 
                 {item.type === "folder" ? (
                   <div className="flex flex-col items-center justify-center gap-2 mt-2">
-                    <Folder className="w-12 h-12 text-yellow-500" />
-                    <span className="font-medium break-words">{item.name}</span>
+                    <Folder className="w-10 h-10 sm:w-12 sm:h-12 text-yellow-500" />
+                    <span className="text-sm sm:text-base font-medium break-words">
+                      {item.name}
+                    </span>
                   </div>
                 ) : (
                   <FileThumbnail file={item} />
