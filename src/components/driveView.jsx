@@ -157,7 +157,9 @@ export default function DriveView() {
 
       <div className="p-4 sm:p-6 border rounded-lg shadow-sm bg-white">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-          <h2 className="text-lg sm:text-2xl font-semibold">My Drive</h2>
+          <h2 className="text-lg sm:text-2xl font-semibold">
+            Welcome to Drive
+          </h2>
           {currentFolderId && (
             <Button variant="outline" onClick={handleBack}>
               <ArrowLeft className="w-4 h-4 mr-2" />
