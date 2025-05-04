@@ -9,13 +9,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { signUpUser } from "@/lib/auth";
-import { toast } from "sonner";
 import Link from "next/link";
 import APP_ROUTES from "@/constants/appRoutes";
+import { useRouter } from "next/navigation";
 
 // Signup Page Component
 export default function SignupPage() {
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const {
     register,
@@ -29,6 +30,7 @@ export default function SignupPage() {
     try {
       setLoading(true);
       await signUpUser(data?.email, data?.password);
+      return router.push(APP_ROUTES.loginPage);
     } catch (error) {
       console.log(error);
     } finally {
