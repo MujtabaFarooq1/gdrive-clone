@@ -43,6 +43,8 @@ export default function DriveView() {
   const [selectedItem, setSelectedItem] = useState(null);
   const [dialogAction, setDialogAction] = useState("");
 
+  const MAX_FILE_SIZE = process.env.NEXT_PUBLIC_MAX_FILE_SIZE_MB * 1024 * 1024;
+
   const handleDialogOpen = (item, action) => {
     setSelectedItem(item);
     setDialogAction(action);
@@ -55,6 +57,7 @@ export default function DriveView() {
       await createFolder(folderName, currentFolderId);
       setFolderName("");
       toast.success("Folder created!");
+      await handleGetDriveData();
     } catch (err) {
       toast.error(err?.message || "Error creating folder");
     } finally {
@@ -65,6 +68,11 @@ export default function DriveView() {
   const handleUploadFile = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    if (file.size > MAX_FILE_SIZE) {
+      toast.error("File is too large. Max size is 5MB.");
+      return (e.target.value = "");
+    }
 
     const formData = new FormData();
     formData.append("file", file, file.name);

@@ -4,6 +4,7 @@ import { withAuth } from "@/lib/withAuth";
 import DriveItem from "@/models/driveItemModel";
 import cloudinary from "@/lib/cloudinary";
 import { appConfig } from "@/config/app";
+import { serverEnv } from "@/config/env";
 
 async function uploadFile(req) {
   try {
@@ -16,6 +17,16 @@ async function uploadFile(req) {
       return NextResponse.json(
         { success: false, message: "No file uploaded" },
         { status: 400 }
+      );
+    }
+
+    if (file.size > serverEnv.MAX_FILE_SIZE) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: `File exceeds ${serverEnv.MAX_FILE_SIZE} B limit`,
+        },
+        { status: 413 }
       );
     }
 

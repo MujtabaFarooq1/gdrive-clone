@@ -59,8 +59,6 @@ async function deleteItemAndChildren(itemId, visited) {
     try {
       const publicId = extractPublicIdFromCloudinaryUrl(item.url);
 
-      console.log(`Cloudinary public id is`, publicId);
-
       await cloudinary.uploader.destroy(publicId);
     } catch (err) {
       console.warn(
