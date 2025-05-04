@@ -11,10 +11,21 @@ export async function POST(req) {
     const { email, password } = await req.json();
 
     await connectToDatabase();
+
     const user = await User.findOne({ email });
 
-    if (!user || !(await bcrypt.compare(password, user.password))) {
-      return new Response("Invalid email or password", { status: 401 });
+    const passwordValid =
+      user && (await bcrypt.compare(password, user.password));
+
+    if (!user || !passwordValid) {
+      return Response.json(
+        {
+          success: false,
+          message: "Invalid email or password",
+          data: {},
+        },
+        { status: 401 }
+      );
     }
 
     user.lastLoggedIn = new Date();
@@ -39,12 +50,22 @@ export async function POST(req) {
       secure: appConfig.cookies.secure,
     });
 
-    return new Response(JSON.stringify({ message: "Login successful" }), {
-      status: 200,
-    });
+    return Response.json(
+      {
+        success: true,
+        message: "Login successful",
+        data: { userId: user._id, email: user.email },
+      },
+      { status: 200 }
+    );
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-    });
+    return Response.json(
+      {
+        success: false,
+        message: "Login failed",
+        data: { error: error.message },
+      },
+      { status: 500 }
+    );
   }
 }

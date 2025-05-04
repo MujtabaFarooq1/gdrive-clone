@@ -31,6 +31,7 @@ async function getDriveData(req) {
 
     return NextResponse.json({
       success: true,
+      message: "Drive data fetched successfully",
       data: {
         items,
         currentFolder,
@@ -38,7 +39,11 @@ async function getDriveData(req) {
     });
   } catch (err) {
     return NextResponse.json(
-      { success: false, message: err.message },
+      {
+        success: false,
+        message: err.message || "Failed to fetch drive data",
+        data: null,
+      },
       { status: 500 }
     );
   }

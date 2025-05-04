@@ -11,7 +11,14 @@ export async function POST(req) {
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return new Response("User already exists", { status: 409 });
+      return NextResponse.json(
+        {
+          success: false,
+          message: "User already exists",
+          data: null,
+        },
+        { status: 409 }
+      );
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -22,13 +29,22 @@ export async function POST(req) {
       password: hashedPassword,
     });
 
-    return new Response(
-      JSON.stringify({ message: "User created", userId: newUser._id }),
+    return NextResponse.json(
+      {
+        success: true,
+        message: "User created successfully",
+        data: { userId: newUser._id },
+      },
       { status: 201 }
     );
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-    });
+    return NextResponse.json(
+      {
+        success: false,
+        message: error.message || "Server error",
+        data: null,
+      },
+      { status: 500 }
+    );
   }
 }

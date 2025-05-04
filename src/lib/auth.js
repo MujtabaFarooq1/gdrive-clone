@@ -1,39 +1,42 @@
 import API_ROUTES from "@/constants/apiRoutes";
+import { apiRequest } from "@/lib/apiRequest";
 
-export const signUpUser = async (email, password) => {
-  const res = await fetch(API_ROUTES.auth.signup, {
-    method: "POST",
-    body: JSON.stringify({ email, password }),
-    headers: {
-      "Content-Type": "application/json",
+export const signUpUser = (email, password) =>
+  apiRequest(
+    API_ROUTES.auth.signup,
+    {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+      headers: { "Content-Type": "application/json" },
     },
-  });
-  if (!res.ok) {
-    throw new Error("Sign-up failed");
-  }
-  return res.json();
-};
+    {
+      successMessage: "Signup successful",
+      defaultErrorMessage: "Signup failed",
+    }
+  );
 
-export const loginUser = async (email, password) => {
-  const res = await fetch(API_ROUTES.auth.login, {
-    method: "POST",
-    body: JSON.stringify({ email, password }),
-    headers: {
-      "Content-Type": "application/json",
+export const loginUser = (email, password) =>
+  apiRequest(
+    API_ROUTES.auth.login,
+    {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+      headers: { "Content-Type": "application/json" },
     },
-  });
-  if (!res.ok) {
-    throw new Error("Login failed");
-  }
-  return res.json();
-};
+    {
+      successMessage: "Logged in successfully",
+      defaultErrorMessage: "Login failed",
+    }
+  );
 
-export const logutUser = async () => {
-  const res = await fetch(API_ROUTES.auth.logout, {
-    method: "POST",
-  });
-  if (!res.ok) {
-    throw new Error("Logout failed");
-  }
-  return res.json();
-};
+export const logoutUser = () =>
+  apiRequest(
+    API_ROUTES.auth.logout,
+    {
+      method: "POST",
+    },
+    {
+      successMessage: "Logged out",
+      defaultErrorMessage: "Logout failed",
+    }
+  );

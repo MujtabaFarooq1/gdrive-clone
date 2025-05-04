@@ -1,98 +1,76 @@
 import API_ROUTES from "@/constants/apiRoutes";
+import { apiRequest } from "@/lib/apiRequest";
 
-export const getDriveData = async (folderId) => {
-  try {
-    const baseUrl = API_ROUTES.drive.getDriveData;
-    const url = new URL(
-      baseUrl,
-      typeof window === "undefined"
-        ? "http://localhost"
-        : window.location.origin
-    );
+export const getDriveData = (folderId) => {
+  const baseUrl = API_ROUTES.drive.getDriveData;
+  const origin =
+    typeof window === "undefined" ? "http://localhost" : window.location.origin;
 
-    if (folderId) {
-      url.searchParams.append("folderId", folderId);
-    }
-
-    const response = await fetch(url.toString());
-
-    if (!response.ok) {
-      throw new Error(`Failed to get drive data: ${response.statusText}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error("getDriveData error:", error);
-    throw error;
+  const url = new URL(baseUrl, origin);
+  if (folderId) {
+    url.searchParams.append("folderId", folderId);
   }
+
+  return apiRequest(
+    url.toString(),
+    {},
+    {
+      defaultErrorMessage: "Failed to fetch drive data",
+      showSuccessToast: false,
+    }
+  );
 };
 
-export const createFolder = async (folderName, parentId) => {
-  const res = await fetch(API_ROUTES.drive.folder.create, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
+export const createFolder = (folderName, parentId) =>
+  apiRequest(
+    API_ROUTES.drive.folder.create,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: folderName, parentId }),
     },
-    body: JSON.stringify({ name: folderName, parentId }),
-  });
+    {
+      successMessage: "Folder created successfully",
+      defaultErrorMessage: "Failed to create folder",
+    }
+  );
 
-  const data = await res.json();
+export const uploadFile = (formData) =>
+  apiRequest(
+    API_ROUTES.drive.file.upload,
+    {
+      method: "POST",
+      body: formData,
+    },
+    {
+      successMessage: "File uploaded successfully",
+      defaultErrorMessage: "Failed to upload file",
+    }
+  );
 
-  if (!res.ok) {
-    throw new Error("Failed to get create folder");
-  }
-
-  return data;
-};
-
-export const uploadFile = async (formData) => {
-  const res = await fetch(API_ROUTES.drive.file.upload, {
-    method: "POST",
-    body: formData,
-  });
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    throw new Error("Failed to upload file");
-  }
-
-  return data;
-};
-
-export const renameDriveItem = async (id, name) => {
-  const res = await fetch(
+export const renameDriveItem = (id, name) =>
+  apiRequest(
     API_ROUTES.drive.renameDriveItem.replaceAll(":id", id),
     {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name }),
+    },
+    {
+      successMessage: "Renamed successfully",
+      defaultErrorMessage: "Failed to rename item",
     }
   );
 
-  const data = await res.json();
-
-  if (!res.ok) {
-    throw new Error("Failed to upload file");
-  }
-
-  return data;
-};
-
-export const deleteDriveItemAndItsChildren = async (id) => {
-  const res = await fetch(
+export const deleteDriveItemAndItsChildren = (id) =>
+  apiRequest(
     API_ROUTES.drive.deleteDriveItemWithChildren.replaceAll(":id", id),
     {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
+    },
+    {
+      successMessage: "Item deleted successfully",
+      defaultErrorMessage: "Failed to delete item",
     }
   );
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    throw new Error("Failed to upload file");
-  }
-
-  return data;
-};
