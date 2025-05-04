@@ -7,6 +7,8 @@ import { extractPublicIdFromCloudinaryUrl } from "@/lib/helpers";
 
 async function renameDriveItem(req, { params }) {
   try {
+    const userId = req.user.userId;
+
     await connectToDatabase();
 
     const { name } = await req.json();
@@ -20,6 +22,13 @@ async function renameDriveItem(req, { params }) {
     }
 
     const foundItem = await DriveItem.findById(id);
+
+    if (foundItem.userId.toString() !== userId) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized request" },
+        { status: 401 }
+      );
+    }
 
     if (!foundItem) {
       return NextResponse.json(
@@ -73,6 +82,8 @@ async function deleteItemAndChildren(itemId, visited) {
 
 async function deleteDriveItemAndItsChildren(req, { params }) {
   try {
+    const userId = req.user.userId;
+
     await connectToDatabase();
 
     const { id } = await params;
@@ -85,6 +96,14 @@ async function deleteDriveItemAndItsChildren(req, { params }) {
     }
 
     const foundItem = await DriveItem.findById(id);
+
+    if (foundItem.userId.toString() !== userId) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized request" },
+        { status: 401 }
+      );
+    }
+
     if (!foundItem) {
       return NextResponse.json(
         { success: false, message: "Item not found." },
