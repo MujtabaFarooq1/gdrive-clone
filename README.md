@@ -1,8 +1,50 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Google Drive Clone
+
+This project is a simplified clone of Google Drive, built with **Next.js**, **Node.js**, **MongoDB**, and **Cloudinary** for file storage. It includes core features such as file upload, folder management, user authentication, and protected routes.
+
+## Tech Stack
+
+- **Frontend**: React.js + Next.js (App Router)
+- **Backend**: Node.js (Next.js API Routes)
+- **Database**: MongoDB
+- **File Storage**: Cloudinary
+- **Authentication**: Custom JWT Authentication
+- **Styling**: Tailwind CSS, ShadCN UI
+
+## Features
+
+### ✅ Main Features
+
+- **User Authentication**: 
+  - Sign up, Log in, Log out
+  - Protected routes for file access
+  - JWT-based authentication stored in HTTP-only cookies
+  
+- **File and Folder System**: 
+  - Create folders
+  - Upload files to folders
+  - View file/folder structure (tree or list)
+
+- **File Management**: 
+  - Rename and delete files/folders
+  - Basic file preview (PDF, image, file info)
+
+- **User-specific Storage**: 
+  - Each user can only access their own files and folders
+  
+- **Responsive UI**: 
+  - Mobile & desktop friendly design
+
+### ⚠️ Common Pitfalls / Warnings
+
+- Do not store actual files in the database — only store metadata.
+- Protected routes for secure file uploads.
+- Handle CORS issues if frontend/backend are separate.
+- Test for upload limits and file size handling.
 
 ## Getting Started
 
-First, run the development server:
+To run the development server, use the following command:
 
 ```bash
 npm run dev
@@ -10,27 +52,3 @@ npm run dev
 yarn dev
 # or
 pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
